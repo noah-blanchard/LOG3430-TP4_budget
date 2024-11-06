@@ -1,0 +1,37 @@
+name: Git Bisect Automation
+
+on:
+  workflow_dispatch:
+    inputs:
+      bad_commit:
+        description: "Le hash du commit défectueux"
+        required: true
+      good_commit:
+        description: "Le hash du dernier commit fonctionnel"
+        required: true
+
+jobs:
+  bisect_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt # si nécessaire
+
+      - name: Set environment variables
+        env:
+          BAD_COMMIT: ${{ github.event.inputs.bad_commit }}
+          GOOD_COMMIT: ${{ github.event.inputs.good_commit }}
+        run: |
+          echo "BAD_COMMIT=${{ github.event.inputs.bad_commit }}" >> $GITHUB_ENV
+          echo "GOOD_COMMIT=${{ github.event.inputs.good_commit }}" >> $GITHUB_ENV
+
+      - name: Run bisect script
+        run: python myscript.py
